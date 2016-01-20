@@ -1,6 +1,16 @@
-/*  
- * Write personal data of a MIFARE RFID card using a RFID-RC522 reader
- * Uses MFRC522 - Library to use ARDUINO RFID MODULE KIT 13.56 MHZ WITH TAGS SPI W AND R BY COOQROBOT. 
+/*
+ * ----------------------------------------------------------------------------
+ * This is a MFRC522 library example; see https://github.com/miguelbalboa/rfid
+ * for further details and other examples.
+ * 
+ * NOTE: The library file MFRC522.h has a lot of useful info. Please read it.
+ * 
+ * Released into the public domain.
+ * ----------------------------------------------------------------------------
+ * This sample shows how to read data blocks on a MIFARE Classic PICC
+ * (= card/tag).
+ * 
+ * Typical pin layout used: 
  * -----------------------------------------------------------------------------------------
  *             MFRC522      Arduino       Arduino   Arduino    Arduino          Arduino
  *             Reader/PCD   Uno           Mega      Nano v3    Leonardo/Micro   Pro Micro
@@ -19,21 +29,34 @@
  * The reader can be found on eBay for around 5 dollars. Search for "mf-rc522" on ebay.com. 
  */
 
- #include <SPI.h>
- #include <MFRC522.h>
+#include <SPI.h>
+#include <MFRC522.h>
 
- #define SS_PIN   10            // Configurable, see typical pin layout above
- #define RST_PIN  8             // Configurable, see typical pin layout above
- MFRC522 rfid(SS_PIN, RST_PIN); // Create MFRC522 Instance
+#define RST_PIN  8             // Configurable, see typical pin layout above
+#define SS_PIN   10            // Configurable, see typical pin layout above
 
- void setup() {
-    Serial.begin(9600);
-    SPI.begin();
-    rfid.PCD_Init();
-    Serial.println("Menulis data pada RFID Card");
+MFRC522 rfid(SS_PIN, RST_PIN); // Create MFRC522 Instance
+MFRC522::MIFARE_Key key;
+
+void setup() {
+  Serial.begin(9600);         // Initialize serial communications
+  while (!Serial);            // Do nothing if no serial port is opened
+  SPI.begin();                // Init SPI bus
+  rfid.PCD_Init();            // Init MFRC522 card
 }
 
 void loop() {
-  
+  // Look for new cards
+  if (!rfid.PICC_IsNewCardPresent()) {
+    return;
+  }
+
+  // Select one of the cards
+  if (!rfid.PICC_ReadCardSerial()) {
+    return;
+  }
+
+  // Dump debug info about the card. PICC_HaltA() is automatically called
+  rfid.PICC_DumpToSerial(&(rfid.uid));
 }
 
